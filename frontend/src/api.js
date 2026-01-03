@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const generatePDF = async (payload) => {
   const response = await axios.post(
-    "http://localhost:4000/generate-pdf",
+    "https://crypto-token-agreement.onrender.com/generate-pdf",
     payload,
     { responseType: "blob" }
   );
