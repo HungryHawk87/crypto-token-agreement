@@ -7,8 +7,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const DEFAULT_LEGAL_TEXT = `
-Hereinafter referred to as the "Buyer", which expression shall include heirs, legal representatives, and permitted assigns.
+const DEFAULT_LEGAL_TEXT = 
+`Hereinafter referred to as the "Buyer", which expression shall include heirs, legal representatives, and permitted assigns.
 
 The Seller and Buyer are hereinafter collectively referred to as the "Parties" and individually as a "Party".
 
@@ -23,6 +23,7 @@ WHEREAS, the Buyer desires to acquire a specified quantity of shares in JMM Trad
 WHEREAS, the Parties wish to set forth the terms and conditions governing the purchase, transfer, ownership, rights, and obligations associated with such shares;
 
 NOW, THEREFORE, in consideration of the mutual covenants, agreements, representations, and warranties contained herein, the Parties agree as follows:
+
 
 ARTICLE 1: DEFINITIONS AND INTERPRETATION
 
@@ -43,6 +44,7 @@ ARTICLE 1: DEFINITIONS AND INTERPRETATION
 1.8 "Transfer" means the legal conveyance of title and ownership of the Shares.
 
 Interpretation: Headings are for convenience only and shall not affect interpretation.
+
 
 ARTICLE 2: SALE AND PURCHASE OF SHARES
 
@@ -267,13 +269,11 @@ Cooperate with the Buyer's due diligence investigation of the Company and the Sh
   
 
 9.3 Public Announcements. Neither Party shall issue any press release or make any public announcement regarding this Agreement or the transactions contemplated hereby without the prior written consent of the other Party, except as may be required by applicable law or regulation. 
-
   
 
 9.4 Confidentiality. Each Party shall keep confidential all non-public information obtained from the other Party in connection with this Agreement and shall not disclose such information to any third party without the prior written consent of the other Party, except as required by law. 
 
   
-
 9.5 Non-Competition and Non-Solicitation. For a period of two (2) years following the Closing Date, the Seller agrees that it shall not, directly or indirectly: 
 
   
@@ -414,6 +414,17 @@ IMPORTANT LEGAL NOTICE
 This document is system-generated for informational purposes only and does not constitute legal or investment advice.
 `;
 
+function addFooter(doc, pageNumber) {
+  const bottom = doc.page.height - 40;
+
+  doc
+    .fontSize(9)
+    .font("Helvetica")
+    .text(`Page ${pageNumber}`, 0, bottom, {
+      align: "center"
+    });
+}
+
 
 app.post("/generate-pdf", (req, res) => {
   const data = req.body;
@@ -426,14 +437,55 @@ app.post("/generate-pdf", (req, res) => {
     "attachment; filename=DAI_Agreement.pdf"
   );
 
-  doc.pipe(res);
+ doc.pipe(res);
 
-  // PAGE 1 – SUMMARY
-  doc.fontSize(11).text(`
-CRYPTO TOKEN PURCHASE AGREEMENT
-DAILY AI (DAI)
+let pageNumber = 1;
 
-Seller: ${data.sellerName}
+// Footer for first page
+addFooter(doc, pageNumber);
+
+// Footer for every new page
+doc.on("pageAdded", () => {
+  pageNumber++;
+  addFooter(doc, pageNumber);
+});
+
+
+
+
+  // ===== PAGE 1 – HEADER =====
+
+// Title
+doc
+  .font("Helvetica-Bold")
+  .fontSize(18)
+  .text("CRYPTO TOKEN PURCHASE AGREEMENT", {
+    align: "center"
+  });
+
+// Underline
+const underlineY = doc.y + 2;
+doc
+  .moveTo(80, underlineY)
+  .lineTo(515, underlineY)
+  .lineWidth(1)
+  .stroke();
+
+doc.moveDown(1);
+
+// Subtitle
+doc
+  .font("Helvetica-Bold")
+  .fontSize(13)
+  .text("DAILY AI (DAI)", { align: "center" });
+
+doc.moveDown(1.5);
+
+doc
+  .font("Helvetica")
+  .fontSize(11)
+  .text(
+`Seller: ${data.sellerName}
 Company: ${data.company}
 Buyer: ${data.buyerName}
 
@@ -445,24 +497,41 @@ Total Value: ${data.totalValue}
 
 This token is a digital asset and not a security.
 No guarantees of profit or listing are provided.
-Blockchain transfers are irreversible.
-`, { width: 500 });
+Blockchain transfers are irreversible.`,
+{
+  width: 500,
+  lineGap: 3   // 🔥 reduces vertical spacing
+});
+
 
   // PAGE 2 – FULL LEGAL TEXT
-  doc.addPage();
+ doc.addPage();
 
-  doc.fontSize(11).text(DEFAULT_LEGAL_TEXT, {
+doc
+  .font("Helvetica-Bold")
+  .fontSize(14)
+  .text("AGREEMENT TERMS AND CONDITIONS", { align: "center" });
+
+doc.moveDown(1);
+
+doc
+  .font("Helvetica")
+  .fontSize(11)
+  .text(DEFAULT_LEGAL_TEXT, {
     width: 500,
-    align: "left"
+    lineGap: 2
   });
+
 
   // PAGE 3 – GOVERNING LAW
   doc.addPage();
 
-  doc.fontSize(11).text(`
-Governing Law: ${data.governingLaw}
-Date: ${data.date}
-`, { width: 500 });
+ doc.fontSize(11).text(
+`Governing Law: ${data.governingLaw}
+Date: ${data.date}`,
+{ width: 500 }
+);
+
 
   // FOOTER
   doc.moveDown(2);
