@@ -1,43 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<head>
+  <meta charset="UTF-8" />
+  <title>Crypto Token Agreement Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+    }
+    button {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+  <h2>Crypto Token Agreement</h2>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+  <input id="sellerName" placeholder="Seller Name" />
+  <input id="company" placeholder="Company Name" />
+  <input id="buyerName" placeholder="Buyer Name" />
+  <input id="blockchain" placeholder="Blockchain" />
+  <input id="tokenPrice" placeholder="Token Price" />
+  <input id="totalTokens" placeholder="Total Tokens" />
+  <input id="totalValue" placeholder="Total Value" />
+  <input id="governingLaw" placeholder="Governing Law" />
+  <input id="date" placeholder="Date" />
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+  <button onclick="generate()">Generate PDF</button>
+
+  <script>
+    async function generate() {
+      const data = {
+        sellerName: sellerName.value,
+        company: company.value,
+        buyerName: buyerName.value,
+        blockchain: blockchain.value,
+        tokenPrice: tokenPrice.value,
+        totalTokens: totalTokens.value,
+        totalValue: totalValue.value,
+        governingLaw: governingLaw.value,
+        date: date.value
+      };
+
+      const res = await fetch(
+        "https://crypto-token-agreement.onrender.com/generate-pdf",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        }
+      );
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Crypto_Token_Agreement.pdf";
+      a.click();
+    }
+  </script>
+
+</body>
 </html>
